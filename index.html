@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SketchPDF</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="top">
+  <div class="brand">Sketch<b>PDF</b></div>
+  <button class="tb" data-act="open" title="PDFを開く (Ctrl+O)">開く</button>
+  <button class="tb" data-act="add" title="PDFを末尾に追加して結合">PDFを追加</button>
+  <span class="sep"></span>
+  <button class="tb ic" id="btn-undo" data-act="undo" title="元に戻す (Ctrl+Z)">↶</button>
+  <button class="tb ic" id="btn-redo" data-act="redo" title="やり直し (Ctrl+Shift+Z)">↷</button>
+  <span class="sep"></span>
+  <button class="tb ic" data-act="zoomout" title="縮小">−</button>
+  <span id="zoomlabel">100%</span>
+  <button class="tb ic" data-act="zoomin" title="拡大">＋</button>
+  <button class="tb" data-act="fit" title="幅に合わせる">幅に合わせる</button>
+  <span class="grow"></span>
+  <span id="docname"></span>
+  <button class="tb" id="btn-savesel" data-act="savesel" title="選択中のページだけを別PDFとして保存（分割）">選択ページを保存</button>
+  <button class="tb primary" data-act="save" title="PDFとして保存 (Ctrl+S)">PDFを保存</button>
+</header>
+
+<div id="main">
+  <nav id="tools"></nav>
+
+  <aside id="pages">
+    <div class="phead">
+      <button class="mini" data-pact="rotate" title="選択ページを右に90°回転">⟳</button>
+      <button class="mini" data-pact="dup" title="複製">⧉</button>
+      <button class="mini" data-pact="blank" title="空白ページを挿入">＋</button>
+      <button class="mini" data-pact="del" title="削除">🗑</button>
+      <button class="mini" data-pact="all" title="全選択">全</button>
+    </div>
+    <div id="thumbs"></div>
+  </aside>
+
+  <section id="stage"><div id="pgs"></div></section>
+
+  <aside id="props"></aside>
+</div>
+
+<div id="empty">
+  <div class="card">
+    <h1>Sketch<b>PDF</b></h1>
+    <p>PDFをここにドロップ、またはボタンで開く</p>
+    <div class="row">
+      <button class="tb primary big" data-act="open">PDFを開く</button>
+      <button class="tb big" data-act="new">空白のPDFから始める</button>
+    </div>
+    <small>ファイルはブラウザ内だけで処理され、外部には送信されません</small>
+  </div>
+</div>
+
+<div id="pageind"></div>
+<div id="busy" hidden><div>処理中…</div></div>
+<div id="toast" hidden></div>
+<div id="pwmask" hidden>
+  <div class="card">
+    <h2>パスワードが必要です</h2>
+    <p id="pw-name"></p>
+    <input type="password" id="pw-input" autocomplete="off" placeholder="パスワード">
+    <p id="pw-err" hidden>パスワードが違います。もう一度入力してください。</p>
+    <div class="row"><button class="tb" id="pw-cancel">キャンセル</button><button class="tb primary" id="pw-ok">開く</button></div>
+  </div>
+</div>
+<div id="dropmask" hidden>ドロップして開く</div>
+
+<input type="file" id="f-open" accept="application/pdf" hidden>
+<input type="file" id="f-add" accept="application/pdf" multiple hidden>
+<input type="file" id="f-img" accept="image/*" hidden>
+
+<script src="vendor/pdf.min.js"></script>
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/fontkit.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

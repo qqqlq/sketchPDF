@@ -36,17 +36,37 @@ LANや外部ネットワークには公開されません。Tailscaleが無い�
 ## 構成
 
 ```
-index.html / vite.config.ts        Vite のエントリ
-src/types.ts geom.ts               オブジェクト・ページの型と、座標計算などの純粋ロジック
-src/docs.ts exportPdf.ts           PDF読み込み(pdf.js/qpdf)・画像登録・PDF書き出し(pdf-lib)
-src/store.ts                       状態(外部ストア)と全アクション。Undo/Redoはスナップショット参照を積む
-src/interaction.ts                 ステージ上のポインタ操作(描画・移動・リサイズ)
-src/components/                    React コンポーネント（Stage / PageView / ObjView / PageList / PropsPanel ほか）
-public/vendor/qpdf.*               復号用 qpdf-wasm（初回のみ遅延読み込み）
-public/fonts/                      BIZ UDPGothic（表示・書き出し用の日本語フォント）
-public/legacy/                     移行前の素のHTML/JS版（`/legacy/` で開ける。動作比較用で、確認後に削除予定）
-serve.py / start.sh                起動用（127.0.0.1 + Tailscale IPのみで待ち受け、dist/ を配信）
-docs/                              作業ドキュメント
+sketchPDF/
+├── index.html                 Vite のエントリ
+├── vite.config.ts
+├── serve.py                   起動用サーバー（127.0.0.1 + Tailscale IP のみ、dist/ を配信）
+├── start.sh                   起動スクリプト（必要なら install / build してから serve.py）
+├── src/
+│   ├── main.tsx / App.tsx     エントリ、全体のキー操作・ドロップ・貼り付け
+│   ├── types.ts               オブジェクト・ページの型
+│   ├── geom.ts                座標計算などの純粋ロジック
+│   ├── docs.ts                PDF読み込み（pdf.js / qpdf 復号）・画像登録
+│   ├── exportPdf.ts           PDF書き出し（pdf-lib）
+│   ├── store.ts               状態（外部ストア）と全アクション、Undo/Redo
+│   ├── interaction.ts         ステージ上のポインタ操作（描画・移動・リサイズ）
+│   ├── hooks.ts               useFlip（並べ替えアニメーション）
+│   ├── tools.ts / files.ts    ツール定義 / ファイル選択ダイアログ
+│   ├── style.css
+│   └── components/
+│       ├── Stage.tsx          ページ一覧の表示・スクロール・ズーム
+│       ├── PageView.tsx       1ページ分（PDF + オブジェクト）
+│       ├── PdfCanvas.tsx      画面付近でだけPDFを描画
+│       ├── ObjView.tsx        オブジェクト描画・選択枠・ハンドル
+│       ├── PageList.tsx       サムネイル一覧（並べ替え・ページ操作）
+│       ├── PropsPanel.tsx     プロパティパネル
+│       ├── Tools.tsx          ツールバー
+│       ├── TopBar.tsx         上部バー
+│       └── Overlays.tsx       空状態・トースト・パスワード・ドロップ表示など
+├── public/
+│   ├── fonts/                 BIZ UDPGothic（表示・書き出し用の日本語フォント）
+│   ├── vendor/                qpdf-wasm（復号用、初回のみ遅延読み込み）ほか
+│   └── legacy/                移行前の素のHTML/JS版（動作比較用、確認後に削除予定）
+└── docs/                      作業ドキュメント
 ```
 
 ## チェンジログ

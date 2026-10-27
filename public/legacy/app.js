@@ -4,7 +4,7 @@
  * 書き出し時に pdf-lib の座標(左下原点)へ変換する。 */
 
 const { PDFDocument, rgb, degrees, LineCapStyle } = PDFLib;
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '../vendor/pdf.worker.min.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const NS = 'http://www.w3.org/2000/svg';
@@ -820,7 +820,7 @@ $('#pages .phead').addEventListener('click', e => {
 /* ---- 暗号化PDFの復号 (qpdf-wasm。パスワードを知っているファイルのみ対象) ---- */
 let qpdfLoad = null;
 const loadQpdf = () => qpdfLoad ||= new Promise((res, rej) => {
-  const sc = el('script'); sc.src = 'vendor/qpdf.js';
+  const sc = el('script'); sc.src = '../vendor/qpdf.js';
   sc.onload = res; sc.onerror = () => rej(new Error('復号ライブラリを読み込めませんでした'));
   document.head.appendChild(sc);
 });
@@ -846,7 +846,7 @@ async function decryptPdf(bytes, name) {
   let pw = '', retry = false;
   for (;;) {
     const msgs = [];
-    const q = await Module({ locateFile: () => 'vendor/qpdf.wasm', print: s => msgs.push(s), printErr: s => msgs.push(s) });
+    const q = await Module({ locateFile: () => '../vendor/qpdf.wasm', print: s => msgs.push(s), printErr: s => msgs.push(s) });
     q.FS.writeFile('/in.pdf', bytes);
     const code = q.callMain([`--password=${pw}`, '--decrypt', '/in.pdf', '/out.pdf']);
     if (code === 0 || code === 3) return q.FS.readFile('/out.pdf').slice();   // 3 = 警告のみ
@@ -938,7 +938,7 @@ async function insertImage(file) {
 let fontCache = {};
 async function loadFontBytes(bold) {
   const k = bold ? 'b' : 'r';
-  if (!fontCache[k]) fontCache[k] = await (await fetch(`fonts/BIZUDPGothic-${bold ? 'Bold' : 'Regular'}.ttf`)).arrayBuffer();
+  if (!fontCache[k]) fontCache[k] = await (await fetch(`../fonts/BIZUDPGothic-${bold ? 'Bold' : 'Regular'}.ttf`)).arrayBuffer();
   return fontCache[k];
 }
 const hex = h => { const n = parseInt(h.slice(1), 16); return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255); };

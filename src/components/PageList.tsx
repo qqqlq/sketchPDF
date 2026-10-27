@@ -1,9 +1,11 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { vsize, total } from '../geom'
+import { useFlip } from '../hooks'
 import {
   addBlankPage, clickThumb, deletePages, duplicatePages, movePages, rotatePages, selectAllPages, useStore,
 } from '../store'
 import type { Page } from '../types'
+import { ObjView } from './ObjView'
 import { PdfCanvas, ScrollRoot } from './PdfCanvas'
 
 type Drop = { id: string; after: boolean } | null
@@ -24,6 +26,9 @@ const Thumb = memo(function Thumb({ page, index, sel, cur, drop, onDragStart, on
       <div className="tc">
         <div className="tbox" style={{ width: tw2, height: th }}>
           <PdfCanvas src={page.src} num={page.num} rot={total(page)} vw={w} vh={h} zoom={tw2 / w} margin={400} />
+          <div className="inner ov" style={{ width: w, height: h, transform: `scale(${tw2 / w})` }}>
+            {page.objs.map(o => <ObjView key={o.id} pid={page.id} o={o} editing={false} />)}
+          </div>
         </div>
       </div>
       <div className="num">{index + 1}</div>
@@ -38,6 +43,9 @@ export function PageList() {
   const [el, setEl] = useState<HTMLElement | null>(null)
   const [drop, setDrop] = useState<Drop>(null)
   const dragIds = useRef<string[] | null>(null)
+
+  const sig = useMemo(() => pages.map(p => p.id + ':' + total(p)).join(','), [pages])
+  useFlip(el, '.th', sig, 0)
 
   // 現在ページのサムネイルが見える位置までリストを動かす
   useEffect(() => {

@@ -8,7 +8,9 @@ Canva風のローカル専用PDFエディター。ブラウザ内だけで動作
 ./start.sh          # ポート変更: ./start.sh 9000
 ```
 
-`file://` では動かないため、付属の簡易サーバー（`serve.py`）経由で開いてください。ビルド不要。
+Vite + React + TypeScript 製です。`start.sh` は `node_modules` が無ければ `npm install`、ソースが `dist/` より新しければ自動でビルドしてから、付属の簡易サーバー（`serve.py`）で `dist/` を配信します。
+
+開発時は `npm run dev`（`127.0.0.1:5173`）でホットリロードできます。型チェック＋ビルドは `npm run build`。
 
 待ち受けるのは **`127.0.0.1` と Tailscale のIP(100.x)だけ**です（`0.0.0.0` では待ち受けません）。
 このPCでは `http://127.0.0.1:8765`、tailnet内の他の端末からは起動時に表示される `http://100.x.x.x:8765`（またはMagicDNS名）で使えます。
@@ -23,7 +25,8 @@ LANや外部ネットワークには公開されません。Tailscaleが無い�
 | 手書き・注釈 | ペン、蛍光ペン（矩形）、付箋風テキスト（背景色付き） |
 | ページ操作 | 並べ替え（ドラッグ）、回転、削除、複製、空白ページ挿入、PDF結合（「PDFを追加」）、分割（「選択ページを保存」） |
 | 暗号化PDF | パスワード付き・編集制限付きPDFを開ける（パスワード入力ダイアログ）。保存したPDFにはパスワードは付かない |
-| 編集補助 | Undo/Redo、ズーム（Ctrl+ホイール）、コピー&ペースト、矢印キー微調整 |
+| 編集補助 | Undo/Redo、ズーム（Ctrl+ホイール・カーソル位置を基準に拡縮）、コピー&ペースト、矢印キー微調整 |
+| 表示 | サムネイルにも編集内容を反映、ページの並べ替え・削除・回転時のアニメーション |
 
 ### ショートカット
 
@@ -33,14 +36,27 @@ LANや外部ネットワークには公開されません。Tailscaleが無い�
 ## 構成
 
 ```
-index.html / style.css / app.js   アプリ本体
-serve.py / start.sh               起動用（127.0.0.1 + Tailscale IPのみで待ち受け）
-vendor/                           pdf.js, pdf-lib, fontkit, qpdf-wasm（オフライン動作用に同梱）
-fonts/                            BIZ UDPGothic（表示・書き出し用の日本語フォント）
-docs/                             作業ドキュメント
+index.html / vite.config.ts        Vite のエントリ
+src/types.ts geom.ts               オブジェクト・ページの型と、座標計算などの純粋ロジック
+src/docs.ts exportPdf.ts           PDF読み込み(pdf.js/qpdf)・画像登録・PDF書き出し(pdf-lib)
+src/store.ts                       状態(外部ストア)と全アクション。Undo/Redoはスナップショット参照を積む
+src/interaction.ts                 ステージ上のポインタ操作(描画・移動・リサイズ)
+src/components/                    React コンポーネント（Stage / PageView / ObjView / PageList / PropsPanel ほか）
+public/vendor/qpdf.*               復号用 qpdf-wasm（初回のみ遅延読み込み）
+public/fonts/                      BIZ UDPGothic（表示・書き出し用の日本語フォント）
+public/legacy/                     移行前の素のHTML/JS版（`/legacy/` で開ける。動作比較用で、確認後に削除予定）
+serve.py / start.sh                起動用（127.0.0.1 + Tailscale IPのみで待ち受け、dist/ を配信）
+docs/                              作業ドキュメント
 ```
 
 ## チェンジログ
+
+### 2026-10-27
+- Vite + React 19 + TypeScript へ移行（旧版は `public/legacy/` に退避）
+- 画面更新を差分描画に変更。ページの回転・削除・複製・ズームで全ページを作り直さなくなり、ちらつきとスクロールのずれを解消
+- ズームをカーソル位置基準に変更（Ctrl+ホイール／トラックパッドのピンチ）
+- サムネイルに編集内容を反映
+- ページの並べ替え・削除・挿入・回転にアニメーション、トースト/ダイアログ/ボタンにトランジションを追加（`prefers-reduced-motion` では無効）
 
 ### 2026-10-14 (3)
 - 起動を `serve.py` に変更し、127.0.0.1 と Tailscale IP で待ち受け（tailnet内の他端末から利用可能。0.0.0.0は不使用）
